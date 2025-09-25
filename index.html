@@ -3,155 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Fast Weather</title>
+  <title>Weather</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-    }
-    body {
-      background: linear-gradient(to right, #667eea, #764ba2);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .container {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-    h1 {
-      margin-bottom: 1rem;
-      font-size: 26px;
-      color: #333;
-    }
-    .controls {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 1rem;
-    }
-    input {
-      flex: 1;
-      padding: 0.7rem;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      font-size: 16px;
-    }
-    button {
-      padding: 0.7rem 1rem;
-      background: #667eea;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover { background: #5a67d8; }
-    .card {
-      margin-top: 1rem;
-      padding: 1.5rem;
-      border-radius: 12px;
-      background: #f9f9f9;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    .location { font-size: 18px; font-weight: 600; margin-bottom: 0.4rem; }
-    .desc { color: #666; margin-bottom: 0.6rem; text-transform: capitalize; }
-    .temp { font-size: 42px; font-weight: 700; margin-bottom: 0.5rem; }
-    .details { font-size: 14px; color: #444; display: flex; flex-direction: column; gap: 4px; }
-    .icon img { margin-top: 0.6rem; width: 90px; height: 90px; }
-    .small { font-size: 13px; color: #666; margin-top: 0.4rem; }
-    @media(max-width:480px) {
-      h1 { font-size: 22px; }
-      input, button { font-size: 14px; }
-      .temp { font-size: 36px; }
-    }
+    body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;background:#eef2f7;color:#222}
+    input,button{padding:8px 12px;margin:6px;font-size:16px}
+    .weather{margin-top:20px;text-align:center}
+    img{width:80px;height:80px}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Fast Weather 🌦️</h1>
-    <div class="controls">
-      <input id="q" placeholder="Enter city name or ZIP" autocomplete="off">
-      <button id="search">Search</button>
-      <button id="locate">📍</button>
-    </div>
-    <div id="out" class="card">
-      <div id="place" class="location">Search a city or use location</div>
-      <div id="desc" class="desc">--</div>
-      <div id="temp" class="temp">--°C</div>
-      <div class="details">
-        <div id="feels">Feels: --°C</div>
-        <div id="hum">Humidity: --%</div>
-        <div id="wind">Wind: -- m/s</div>
-      </div>
-      <div class="icon">
-        <img id="icon" src="" alt="">
-      </div>
-      <div id="time" class="small">--</div>
-      <div id="extra" class="small">--</div>
-    </div>
+  <h2>Weather</h2>
+  <div>
+    <input id="city" placeholder="Enter city">
+    <button onclick="getWeather()">Search</button>
   </div>
+  <div class="weather" id="weather"></div>
 
   <script>
-    const key = '51f29668056f7df375e97a0823e67150';
-    const q = document.getElementById('q');
-    const search = document.getElementById('search');
-    const locate = document.getElementById('locate');
-    const place = document.getElementById('place');
-    const desc = document.getElementById('desc');
-    const temp = document.getElementById('temp');
-    const feels = document.getElementById('feels');
-    const hum = document.getElementById('hum');
-    const wind = document.getElementById('wind');
-    const icon = document.getElementById('icon');
-    const timeEl = document.getElementById('time');
-    const extra = document.getElementById('extra');
-
-    async function fetchWeatherByCoords(lat,lon){
-      try {
-        const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${key}`);
-        if(!r.ok) throw new Error('bad');
-        const d=await r.json(); render(d);
-      } catch(e){ place.textContent='Unable to fetch'; desc.textContent='Check API key or network'; }
+    const key = "51f29668056f7df375e97a0823e67150";
+    async function getWeather(){
+      const city=document.getElementById("city").value.trim();
+      if(!city)return;
+      const res=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${key}`);
+      if(!res.ok){document.getElementById("weather").textContent="City not found";return;}
+      const d=await res.json();
+      document.getElementById("weather").innerHTML=
+        `<h3>${d.name}, ${d.sys.country}</h3>
+         <div>${d.weather[0].description}</div>
+         <div><img src="https://openweathermap.org/img/wn/${d.weather[0].icon}@2x.png"></div>
+         <div><strong>${Math.round(d.main.temp)}°C</strong></div>`;
     }
-    async function fetchWeatherByQuery(qs){
-      if(!qs) return;
-      try {
-        const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(qs)}&units=metric&appid=${key}`);
-        if(!r.ok) throw new Error('bad');
-        const d=await r.json(); render(d);
-      } catch(e){ place.textContent='Not found'; desc.textContent='Try another query'; }
-    }
-    function render(d){
-      if(!d||!d.main){ place.textContent='No data'; return }
-      place.textContent=`${d.name}${d.sys&&d.sys.country?(', '+d.sys.country):''}`;
-      desc.textContent=d.weather?.[0]?.description || '--';
-      temp.textContent=Math.round(d.main.temp)+'°C';
-      feels.textContent='Feels: '+Math.round(d.main.feels_like)+'°C';
-      hum.textContent='Humidity: '+d.main.humidity+'%';
-      wind.textContent='Wind: '+(d.wind?.speed || '--')+' m/s';
-      const ic=d.weather?.[0]?.icon || '01d';
-      icon.src=`https://openweathermap.org/img/wn/${ic}@2x.png`;
-      timeEl.textContent=new Date(d.dt*1000).toLocaleString();
-      extra.textContent=`Pressure ${d.main.pressure} hPa`;
-    }
-    search.addEventListener('click',()=>fetchWeatherByQuery(q.value.trim()));
-    q.addEventListener('keydown',e=>{if(e.key==='Enter')fetchWeatherByQuery(q.value.trim())});
-    locate.addEventListener('click',()=>{if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(pos=>{
-        fetchWeatherByCoords(pos.coords.latitude,pos.coords.longitude)
-      },()=>{place.textContent='Location denied';});
-    }});
   </script>
 </body>
 </html>
