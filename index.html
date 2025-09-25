@@ -5,69 +5,105 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Fast Weather</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#38bdf8;--muted:#94a3b8}
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#071023 0%,var(--bg) 100%);color:#e6eef6;display:flex;align-items:center;justify-content:center;padding:24px}
-    .app{width:100%;max-width:760px}
-    header{display:flex;gap:12px;align-items:center;margin-bottom:18px}
-    .brand{font-weight:700;font-size:20px;letter-spacing:0.4px}
-    .controls{display:flex;gap:8px;margin-left:auto}
-    .input{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:10px;color:inherit;min-width:200px}
-    .btn{background:linear-gradient(90deg,var(--accent),#60a5fa);border:none;padding:10px 12px;border-radius:10px;color:#012433;font-weight:600;cursor:pointer}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:16px;padding:20px;display:grid;grid-template-columns:1fr 140px;gap:18px;align-items:center;border:1px solid rgba(255,255,255,0.03)}
-    .main{display:flex;flex-direction:column;gap:8px}
-    .location{font-size:18px;font-weight:700}
-    .desc{color:var(--muted);text-transform:capitalize}
-    .metrics{display:flex;gap:12px;align-items:center}
-    .temp{font-size:46px;font-weight:800}
-    .small{font-size:13px;color:var(--muted)}
-    .icon{display:flex;flex-direction:column;align-items:center}
-    .meta{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
-    .row{display:flex;gap:12px;align-items:center}
-    .pill{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-weight:600}
-    .loader{width:36px;height:36px;border-radius:50%;border:4px solid rgba(255,255,255,0.06);border-top-color:var(--accent);animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-    @media(max-width:560px){.card{grid-template-columns:1fr;gap:14px}.controls{flex-direction:column;align-items:flex-end}.input{min-width:140px}}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      background: linear-gradient(to right, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 26px;
+      color: #333;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+    input {
+      flex: 1;
+      padding: 0.7rem;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 0.7rem 1rem;
+      background: #667eea;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover { background: #5a67d8; }
+    .card {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: #f9f9f9;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .location { font-size: 18px; font-weight: 600; margin-bottom: 0.4rem; }
+    .desc { color: #666; margin-bottom: 0.6rem; text-transform: capitalize; }
+    .temp { font-size: 42px; font-weight: 700; margin-bottom: 0.5rem; }
+    .details { font-size: 14px; color: #444; display: flex; flex-direction: column; gap: 4px; }
+    .icon img { margin-top: 0.6rem; width: 90px; height: 90px; }
+    .small { font-size: 13px; color: #666; margin-top: 0.4rem; }
+    @media(max-width:480px) {
+      h1 { font-size: 22px; }
+      input, button { font-size: 14px; }
+      .temp { font-size: 36px; }
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="brand">Fast Weather</div>
-      <div class="controls">
-        <input id="q" class="input" placeholder="City name or ZIP" autocomplete="off">
-        <button id="search" class="btn">Search</button>
-        <button id="locate" class="btn">Use My Location</button>
-      </div>
-    </header>
+  <div class="container">
+    <h1>Fast Weather 🌦️</h1>
+    <div class="controls">
+      <input id="q" placeholder="Enter city name or ZIP" autocomplete="off">
+      <button id="search">Search</button>
+      <button id="locate">📍</button>
+    </div>
     <div id="out" class="card">
-      <div class="main">
-        <div id="place" class="location">Search a city or use location</div>
-        <div id="desc" class="desc">--</div>
-        <div class="metrics">
-          <div id="temp" class="temp">--°C</div>
-          <div class="row">
-            <div id="feels" class="small">Feels: --°C</div>
-            <div id="hum" class="small">Humidity: --%</div>
-            <div id="wind" class="small">Wind: -- m/s</div>
-          </div>
-        </div>
+      <div id="place" class="location">Search a city or use location</div>
+      <div id="desc" class="desc">--</div>
+      <div id="temp" class="temp">--°C</div>
+      <div class="details">
+        <div id="feels">Feels: --°C</div>
+        <div id="hum">Humidity: --%</div>
+        <div id="wind">Wind: -- m/s</div>
       </div>
       <div class="icon">
-        <img id="icon" src="" width="100" height="100" alt="">
-        <div class="meta">
-          <div id="time" class="small">--</div>
-          <div id="extra" class="pill">--</div>
-        </div>
+        <img id="icon" src="" alt="">
       </div>
+      <div id="time" class="small">--</div>
+      <div id="extra" class="small">--</div>
     </div>
-    <footer>Powered by OpenWeatherMap</footer>
   </div>
+
   <script>
     const key = '51f29668056f7df375e97a0823e67150';
-    const out = document.getElementById('out');
     const q = document.getElementById('q');
     const search = document.getElementById('search');
     const locate = document.getElementById('locate');
@@ -80,15 +116,42 @@
     const icon = document.getElementById('icon');
     const timeEl = document.getElementById('time');
     const extra = document.getElementById('extra');
-    function showLoading(){out.querySelector('.main').style.opacity='0.5';const l=document.createElement('div');l.className='loader';l.id='__loader';out.appendChild(l);}
-    function hideLoading(){out.querySelector('.main').style.opacity='1';const l=document.getElementById('__loader');if(l)l.remove();}
-    async function fetchWeatherByCoords(lat,lon){const cacheKey=`w_${lat.toFixed(2)}_${lon.toFixed(2)}`;const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&Date.now()-cached.t<600000){render(cached.data);return}showLoading();try{const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${key}`);if(!r.ok)throw new Error('bad');const data=await r.json();localStorage.setItem(cacheKey,JSON.stringify({t:Date.now(),data}));render(data)}catch(e){place.textContent='Unable to fetch';desc.textContent='Check API key or network';}finally{hideLoading()}}
-    async function fetchWeatherByQuery(qs){if(!qs)return;const cacheKey=`w_q_${qs.toLowerCase()}`;const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&Date.now()-cached.t<600000){render(cached.data);return}showLoading();try{const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(qs)}&units=metric&appid=${key}`);if(!r.ok)throw new Error('bad');const data=await r.json();localStorage.setItem(cacheKey,JSON.stringify({t:Date.now(),data}));render(data)}catch(e){place.textContent='Not found';desc.textContent='Try another query';}finally{hideLoading()}}
-    function render(d){if(!d||!d.main){place.textContent='No data';return}place.textContent=`${d.name}${d.sys&&d.sys.country?(', '+d.sys.country):''}`;desc.textContent=d.weather&&d.weather[0]&&d.weather[0].description?d.weather[0].description:'--';temp.textContent=Math.round(d.main.temp)+'°C';feels.textContent='Feels: '+Math.round(d.main.feels_like)+'°C';hum.textContent='Humidity: '+d.main.humidity+'%';wind.textContent='Wind: '+(d.wind&&d.wind.speed?d.wind.speed:'--')+' m/s';const ic=d.weather&&d.weather[0]&&d.weather[0].icon?d.weather[0].icon:'01d';icon.src=`https://openweathermap.org/img/wn/${ic}@2x.png`;timeEl.textContent=new Date(d.dt*1000).toLocaleString();extra.textContent=`Pressure ${d.main.pressure} hPa`}
-    search.addEventListener('click',()=>{fetchWeatherByQuery(q.value.trim())});
+
+    async function fetchWeatherByCoords(lat,lon){
+      try {
+        const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${key}`);
+        if(!r.ok) throw new Error('bad');
+        const d=await r.json(); render(d);
+      } catch(e){ place.textContent='Unable to fetch'; desc.textContent='Check API key or network'; }
+    }
+    async function fetchWeatherByQuery(qs){
+      if(!qs) return;
+      try {
+        const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(qs)}&units=metric&appid=${key}`);
+        if(!r.ok) throw new Error('bad');
+        const d=await r.json(); render(d);
+      } catch(e){ place.textContent='Not found'; desc.textContent='Try another query'; }
+    }
+    function render(d){
+      if(!d||!d.main){ place.textContent='No data'; return }
+      place.textContent=`${d.name}${d.sys&&d.sys.country?(', '+d.sys.country):''}`;
+      desc.textContent=d.weather?.[0]?.description || '--';
+      temp.textContent=Math.round(d.main.temp)+'°C';
+      feels.textContent='Feels: '+Math.round(d.main.feels_like)+'°C';
+      hum.textContent='Humidity: '+d.main.humidity+'%';
+      wind.textContent='Wind: '+(d.wind?.speed || '--')+' m/s';
+      const ic=d.weather?.[0]?.icon || '01d';
+      icon.src=`https://openweathermap.org/img/wn/${ic}@2x.png`;
+      timeEl.textContent=new Date(d.dt*1000).toLocaleString();
+      extra.textContent=`Pressure ${d.main.pressure} hPa`;
+    }
+    search.addEventListener('click',()=>fetchWeatherByQuery(q.value.trim()));
     q.addEventListener('keydown',e=>{if(e.key==='Enter')fetchWeatherByQuery(q.value.trim())});
-    locate.addEventListener('click',()=>{if(!navigator.geolocation){place.textContent='Geolocation not supported';return}showLoading();navigator.geolocation.getCurrentPosition(pos=>{fetchWeatherByCoords(pos.coords.latitude,pos.coords.longitude)},err=>{hideLoading();place.textContent='Location denied';desc.textContent='Allow location or search manually'})});
-    (async function(){const last=localStorage.getItem('w_last_query');if(last){fetchWeatherByQuery(last)}else if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{fetchWeatherByCoords(pos.coords.latitude,pos.coords.longitude)},()=>{})}})();
+    locate.addEventListener('click',()=>{if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos=>{
+        fetchWeatherByCoords(pos.coords.latitude,pos.coords.longitude)
+      },()=>{place.textContent='Location denied';});
+    }});
   </script>
 </body>
 </html>
