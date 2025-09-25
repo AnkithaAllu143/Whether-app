@@ -3,36 +3,103 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Weather</title>
+  <title>WeatherX</title>
   <style>
-    body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;background:#eef2f7;color:#222}
-    input,button{padding:8px 12px;margin:6px;font-size:16px}
-    .weather{margin-top:20px;text-align:center}
-    img{width:80px;height:80px}
+    :root {
+      --bg: linear-gradient(to right, #667eea, #764ba2);
+      --card-bg: #fff;
+      --accent: #667eea;
+      --text: #222;
+      --muted: #666;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+    }
+    .container {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h1 { margin-bottom: 1rem; font-size: 28px; }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover { background-color: #5a67d8; }
+    .weather {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .location { font-size: 18px; font-weight: 600; margin-bottom: 0.4rem; }
+    .desc { color: var(--muted); margin-bottom: 0.6rem; text-transform: capitalize; }
+    .temp { font-size: 42px; font-weight: 700; margin-bottom: 0.5rem; }
+    img { width: 90px; height: 90px; margin-bottom: 0.5rem; }
+    @media(max-width:480px) {
+      h1 { font-size: 22px; }
+      input, button { font-size: 15px; padding: 0.7rem; }
+      .temp { font-size: 36px; }
+    }
   </style>
 </head>
 <body>
-  <h2>Weather</h2>
-  <div>
+  <div class="container">
+    <h1>WeatherX 🌦️</h1>
     <input id="city" placeholder="Enter city">
-    <button onclick="getWeather()">Search</button>
+    <button onclick="getWeather()">Get Weather</button>
+    <div class="weather" id="weather"></div>
   </div>
-  <div class="weather" id="weather"></div>
 
   <script>
     const key = "51f29668056f7df375e97a0823e67150";
-    async function getWeather(){
-      const city=document.getElementById("city").value.trim();
-      if(!city)return;
-      const res=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${key}`);
-      if(!res.ok){document.getElementById("weather").textContent="City not found";return;}
-      const d=await res.json();
-      document.getElementById("weather").innerHTML=
-        `<h3>${d.name}, ${d.sys.country}</h3>
-         <div>${d.weather[0].description}</div>
-         <div><img src="https://openweathermap.org/img/wn/${d.weather[0].icon}@2x.png"></div>
-         <div><strong>${Math.round(d.main.temp)}°C</strong></div>`;
+    async function getWeather() {
+      const city = document.getElementById("city").value.trim();
+      const weatherDiv = document.getElementById("weather");
+      if (!city) { weatherDiv.textContent = "Please enter a city"; return; }
+      try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${key}`);
+        if (!res.ok) { weatherDiv.textContent = "City not found"; return; }
+        const d = await res.json();
+        weatherDiv.innerHTML = `
+          <div class="location">${d.name}, ${d.sys.country}</div>
+          <div class="desc">${d.weather[0].description}</div>
+          <div class="temp">${Math.round(d.main.temp)}°C</div>
+          <img src="https://openweathermap.org/img/wn/${d.weather[0].icon}@2x.png" alt="icon">
+        `;
+      } catch {
+        weatherDiv.textContent = "Failed to fetch weather";
+      }
     }
+
+    // Optional: Press Enter to search
+    document.getElementById("city").addEventListener("keydown", e => {
+      if (e.key === "Enter") getWeather();
+    });
   </script>
 </body>
 </html>
